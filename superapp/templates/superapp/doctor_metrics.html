@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <style>
+        body {
+            background-color: #ffffff;
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <title>Измерения</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<nav class="navbar sticky-top navbar-light bg-light text center" style="background-color: #ffffff; border-bottom: solid; border-color: #0d6efd">
+    <div class="container-fluid" style="margin-left: 10px">
+	    <div class="btn-group">
+      <a href="{% url 'parameters' %}" type="button" class="btn" title="Перейти в профиль" style="background-image: url('https://img.icons8.com/ios-filled/50/user-male-circle.png'); background-size: cover; width:  50px; height: 50px;"></a>
+      <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" style="height: 50px">
+        <span class="">{{request.user.username}}</span>
+        </button>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" style="color: red" href="{% url 'logout' %}">Выйти</a></li>
+  </ul>
+</div>
+	    <h1>Измерения и информация пациента</h1>
+	    <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasLeft" aria-controls="offcanvasLeft" style="margin-right:10px">Главная</button>
+		<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasLeft" aria-labelledby="offcanvasLeftLabel">
+		  <div class="offcanvas-header">
+		    <h3 id="offcanvasLeftLabel">Вернуться в профель</h3>
+		    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+		  </div>
+		  <div class="offcanvas-body">
+		  	<div class="d-grid gap-2">
+                <a href="{% url 'dairy' %}" class="btn btn-primary">Дневник</a>
+                <a href="{% url 'chat' %}" class="btn btn-primary">Чат</a>
+                <a href="{% url 'profile' %}" class="btn btn-primary">Вернуться в личный кабинет</a>
+                <br>
+                <img src="https://kartinkof.club/uploads/posts/2022-03/1648667369_24-kartinkof-club-p-lor-smeshnie-kartinki-28.png" width="380px" height="480px">
+			</div>
+		  </div>
+		</div>
+	  </div>
+	</nav>
+
+<br>
+<form method="POST">
+         {% csrf_token %}
+        <label for="patient_id">Выберите пациента:</label>
+        <select name="patient_id">
+            {% for patient in patients %}
+                <option value="{{ patient.id }}">{{ patient.klapan }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-primary" style="font-size: 65%; margin-bottom: 3px">Выбрать</button>
+</form>
+
+<div class="container">
+    <h3>{{ patient.klapan }}</h3>
+    {%if request.method == 'POST' %}
+    <h3> Пол: {{patient.sex}} Рост: {{patient.height}} Вес: {{last_weight}}</h3>
+    <br>
+    <div class="container">
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        <div class="col">
+            <h3>Примечания к измерениям</h3>
+            <p>{{ patient.comments_patient }}</p>
+        </div>
+        <div class="col">
+            <h3>Примечания к приемам лекарств пациента</h3>
+            <p>{{ patient.side_effects }}</p>
+        </div>
+    </div>
+    </div>
+    <br>
+    <div class="row row-cols-1 row-cols-md-2 g-10">
+        <div class="col">
+            <h3>Перечень непереносимых препаратов</h3>
+            <h5>{{ patient.intolerant_drugs }}</h5>
+        </div>
+        <div class="col"><h3>Список аллергии</h3>
+            <h5>{{ patient.allergies }}</h5>
+        </div>
+    </div>
+    <br>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="col"><p>График пульса</p><canvas id="chart1" style="max-width: 470px; max-height: 300px"></canvas><button onclick="print1()" title="Распечатать график веса">Печать</button></div>
+        <div class="col"><p>График давления</p><canvas id="chart2" style="max-width: 470px; max-height: 300px"></canvas><button onclick="print2()" title="Распечатать график веса">Печать</button></div>
+        <div class="col"><p>График веса</p><canvas id="chart3" style="max-width: 470px; max-height: 300px"></canvas><button onclick="print3()" title="Распечатать график веса">Печать</button></div>
+        <div class="col"><p>График температуры</p><canvas id="chart4" style="max-width: 470px; max-height: 300px"></canvas><button onclick="print4()" title="Распечатать график веса">Печать</button></div>
+        <div class="col"><p>График сатурации</p><canvas id="chart5" style="max-width: 470px; max-height: 300px"></canvas><button onclick="print5()" title="Распечатать график веса">Печать</button></div>
+    </div>
+</div>
+
+
+
+    {% else %}
+    <h5>Выберите пациента и нажмите "Выбрать"</h5>
+{%endif%}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script>
+    var ctx1 = document.getElementById('chart1');
+    var ctx2 = document.getElementById('chart2');
+    var ctx3 = document.getElementById('chart3');
+    var ctx4 = document.getElementById('chart4')
+    var ctx5 = document.getElementById('chart5')
+
+
+    var chartData1 = {
+        labels: {{ pulse_metrics_date_list|safe }},
+        datasets: [{
+            label: 'Уд/мин',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255,99,132,1)',
+            borderWidth: 1,
+            data: {{ pulse_list }}
+        }]
+    };
+
+    var chartData2 = {
+        labels: {{ pressure_metrics_date_list|safe }},
+        datasets: [{
+            label: 'Артериальное давление',
+            data: {{ arteric_pressure_list }},
+            borderColor: 'red',
+            fill: false
+        },
+        {
+            label: 'Среднее давление',
+            data: {{ average_pressure_list }},
+            borderColor: 'green',
+            fill: false
+        },
+        {
+            label: 'Дистолическое давление',
+            data: {{ diastolic_pressure_list }},
+            borderColor: 'blue',
+            fill: false
+        }
+        ]
+    };
+
+    var chartData3 = {
+        labels: {{ weight_metrics_date_list|safe }},
+        datasets: [{
+            label: 'КГ',
+            data: {{ weight_list }},
+            borderWidth: 1
+      }]
+    };
+
+    var chartData4 = {
+      labels: {{ temperature_metrics_list|safe }},
+      datasets: [{
+        label: 'Градусы цельсия',
+        data: {{ temperature_list }},
+        borderWidth: 1
+      }]
+    };
+
+    var chartData5 = {
+      labels: {{ oxygen_blood_avg_list|safe }},
+      datasets: [{
+        label: 'Сатурация',
+        data: {{ oxygen_blood_list }},
+        borderWidth: 1
+      }]
+    };
+
+    new Chart(ctx1, {
+        type: 'line',
+        data: chartData1,
+        options: {
+        }
+    });
+
+    new Chart(ctx2, {
+        type: 'line',
+        data: chartData2,
+        options: {
+        }
+    });
+
+    new Chart(ctx3, {
+        type: 'line',
+        data: chartData3,
+        options: {
+        }
+    });
+
+    new Chart(ctx4, {
+        type: 'line',
+        data: chartData4,
+        options: {
+        }
+    });
+
+    new Chart(ctx5, {
+        type: 'line',
+        data: chartData5,
+        options: {
+        }
+    });
+
+
+     function print1() {
+      var canvas = document.getElementById("chart1");
+      var printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.open();
+      printWindow.document.write('<html><head><title>График пульса № Клапана{{ patient.klapan }}</title></head><body>');
+      printWindow.document.write('<img src="' + canvas.toDataURL() + '" style="width:100%">');
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+        };
+      }
+      function print2() {
+      var canvas = document.getElementById("chart2");
+      var printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.open();
+      printWindow.document.write('<html><head><title>График давления № Клапана{{ patient.klapan }}</title></head><body>');
+      printWindow.document.write('<img src="' + canvas.toDataURL() + '" style="width:100%">');
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+        };
+      }
+      function print3() {
+      var canvas = document.getElementById("chart3");
+      var printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.open();
+      printWindow.document.write('<html><head><title>График веса № Клапана{{ patient.klapan }}</title></head><body>');
+      printWindow.document.write('<img src="' + canvas.toDataURL() + '" style="width:100%">');
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+        };
+      }
+      function print4() {
+      var canvas = document.getElementById("chart4");
+      var printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.open();
+      printWindow.document.write('<html><head><title>График температуры № Клапана{{ patient.klapan }}</title></head><body>');
+      printWindow.document.write('<img src="' + canvas.toDataURL() + '" style="width:100%">');
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+        };
+      }
+      function print5() {
+      var canvas = document.getElementById("chart5");
+      var printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.open();
+      printWindow.document.write('<html><head><title>График сатурации № Клапана{{ patient.klapan }}</title></head><body>');
+      printWindow.document.write('<img src="' + canvas.toDataURL() + '" style="width:100%">');
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+        };
+      }
+  </script>
+</body>
+</html>

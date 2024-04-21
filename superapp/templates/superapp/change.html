@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body {
+        background-color: #ffffff;
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <title>Change Form</title>
+</head>
+<body>
+{% if request.user.is_doctor == False %}
+    <form method="post">
+        {% csrf_token %}
+        <p>Серия и номер клапана: {{ form.klapan }}</p>
+        <p>Пол: {{ form.sex }}</p>
+        <p>Рост(СМ) {{ form.height }}</p>
+        <p>Дата рождения: {{ form.date_of_birth }}</p>
+        <p>Дата изготовления клапана: {{ form.date_of_made_klapan }}</p>
+        <p>Изготовитель клапана: {{ form.manufacturer }}</p>
+        <p>Дата операции: {{ form.date_of_operation }}</p>
+        <p>Аллергия: {{ form.allergies }}</p>
+        <p>Непереносимые препараты: {{ form.intolerant_drugs }}</p>
+        <button type="submit" class="btn btn-success">Изменить данные</button>
+    </form>
+{% else %}
+    <form method="post">
+        {% csrf_token %}
+        <p>Фамилия: {{ form.surname }}</p>
+        <p> Имя: {{ form.name }}</p>
+        <p>Отчество: {{ form.fathers_name }}</p>
+        <p>Номер телефона: {{ form.t_number }}</p>
+        <p>Место работы: {{ form.workplace }}</p>
+        <p>Должность: {{ form.position }}</p>
+        <button type="submit" class="btn btn-success">Изменить данные</button>
+    </form>
+{%endif%}
+</body>
+</html>

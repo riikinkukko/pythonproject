@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Дневник</title>
+    <style>
+    {% if request.user.is_doctor %}
+        {% if t %}
+            #div {
+                display: block
+            }
+        {% else %}
+            #div {
+                display: None
+            }
+        {% endif %}
+    {% endif %}
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body>
+{% if request.user.is_doctor %}
+    <nav class="navbar sticky-top navbar-light bg-light text center" style="background-color: #ffffff; border-bottom: solid; border-color: #0d6efd">
+    <div class="container-fluid" style="margin-left: 10px">
+	    <div class="btn-group">
+      <a href="{% url 'parameters' %}" type="button" class="btn" title="Перейти в профиль" style="background-image: url('https://img.icons8.com/ios-filled/50/user-male-circle.png'); background-size: cover; width:  50px; height: 50px;"></a>
+      <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" style="height: 50px">
+        <span class="">{{request.user.username}}</span>
+        </button>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" style="color: red" href="{% url 'logout' %}">Выйти</a></li>
+  </ul>
+</div>
+	    <h1>Просмотр дневника</h1>
+	    <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasLeft" aria-controls="offcanvasLeft" style="margin-right:10px">Главная</button>
+		<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasLeft" aria-labelledby="offcanvasLeftLabel">
+		  <div class="offcanvas-header">
+		    <h3 id="offcanvasLeftLabel">Выберите</h3>
+		    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+		  </div>
+		  <div class="offcanvas-body">
+		  	<div class="d-grid gap-2">
+                <a href="{% url 'doctor_metrics' %}" class="btn btn-primary">Проверить измерения</a>
+                <a href="{% url 'chat' %}" class="btn btn-primary">Чат</a>
+                <a href="{% url 'profile' %}" class="btn btn-primary">Вернуться в личный кабинет</a>
+                <br>
+                <img src="https://kartinkof.club/uploads/posts/2022-03/1648667369_24-kartinkof-club-p-lor-smeshnie-kartinki-28.png" width="380px" height="480px">
+			</div>
+		  </div>
+		</div>
+	  </div>
+	</nav>
+{% else %}
+<nav class="navbar sticky-top navbar-light bg-light text center" style="background-color: #ffffff; border-bottom: solid; border-color: #0d6efd">
+    <div class="container-fluid" style="margin-left: 10px">
+	    <div class="btn-group">
+      <a href="{% url 'parameters' %}" type="button" class="btn" title="Перейти в профиль" style="background-image: url('https://img.icons8.com/ios-filled/50/user-male-circle.png'); background-size: cover; width:  50px; height: 50px;"></a>
+      <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" style="height: 50px">
+        <span class="">{{request.user.username}}</span>
+        </button>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" style="color: red" href="{% url 'logout' %}">Выйти</a></li>
+  </ul>
+</div>
+	    <h1>Дневник</h1>
+	    <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasLeft" aria-controls="offcanvasLeft" style="margin-right:10px">Главная</button>
+		<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasLeft" aria-labelledby="offcanvasLeftLabel">
+		  <div class="offcanvas-header">
+		    <h3 id="offcanvasLeftLabel">Измерения</h3>
+		    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+		  </div>
+		  <div class="offcanvas-body">
+		  	<div class="d-grid gap-2">
+                <a href="{% url 'chat' %}" class="btn btn-primary">Чат</a>
+                <a href="{% url 'pressure_metrics' %}" class="btn btn-outline-primary">Давление</a>
+                <a href="{% url 'weight_metrics' %}" class="btn btn-outline-primary">Вес</a>
+				<a href="{% url 'pulse_metrics' %}"  class="btn btn-outline-primary">Пульс</a>
+                <a href="{% url 'oxygen_blood_metrics' %}"  class="btn btn-outline-primary">Кислород в крови</a>
+                <a href="{% url 'temperature_metrics' %}"  class="btn btn-outline-primary">Температура</a>
+                <a href="{% url 'profile' %}" class="btn btn-primary">Вернуться в личный кабинет</a>
+                <br>
+                <img src="https://kartinkof.club/uploads/posts/2022-03/1648667369_24-kartinkof-club-p-lor-smeshnie-kartinki-28.png" width="380px" height="480px">
+			</div>
+		  </div>
+		</div>
+	  </div>
+	</nav>
+{% endif %}
+{% if request.user.is_doctor %}
+<h3>Просмотр дневника пациента: {{ patient.klapan }}</h3>
+<br>
+<form method="POST">
+         {% csrf_token %}
+        <label for="patient_id">Выберите пациента:</label>
+        <select name="patient_id">
+            {% for patient in patients %}
+                <option value="{{ patient.id }}">{{ patient.klapan }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-primary" style="font-size: 65%; margin-bottom: 3px" name="button">Выбрать</button>
+</form>
+{% endif %}
+
+<br>
+<form method="post">
+    {% csrf_token %}
+    <input type="date" name="time_select" value="{{ request.user.last_date }}">
+    <button class="btn btn-primary" style="font-size: 65%; margin-bottom: 3px" name="btn_select">Выбрать</button>
+</form>
+<br>
+{% if request.method == 'POST' %}
+    {% if counter == 0 %}
+        <p>Записей на это число не найдено</p>
+    {% else %}
+    {% for record in records_date %}
+    <div id="div">
+        <p>{{ record.time }} {{ record.content }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+{% endif %}
+{% if counter != 0 %}
+Записей найдено: {{ counter }}
+{% endif %}
+{% if request.user.last_date == today and not request.user.is_doctor %}
+  <form method="post">
+    {% csrf_token %}
+    <input type="text" name="content">
+    <button type="submit" name="button" class="btn btn-primary">Добавить запись</button>
+  </form>
+{% endif %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
